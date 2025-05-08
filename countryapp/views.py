@@ -44,4 +44,21 @@ class CountryDetailAPIView(APIView):
         serializer = CountryListSerializer(country)
         return Response(serializer.data)
     
+    def put(self, request, pk):
+        """Update an existing country"""
+        country = self.get_object(pk)
+        serializer = CountryCreateUpdateSerializer(country, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            # Return the updated country with full details
+            updated_country = self.get_object(pk)
+            response_serializer = CountryListSerializer(updated_country)
+            return Response(response_serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    def delete(self, request, pk):
+        """Delete an existing country"""
+        country = self.get_object(pk)
+        country.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
