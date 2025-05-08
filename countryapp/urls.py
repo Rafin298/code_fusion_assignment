@@ -2,10 +2,11 @@
 from django.urls import path
 
 from .views import (
-    CountryListAPIView
+    CountryListAPIView, CountryDetailAPIView
 )
 
 urlpatterns = [
-    # Main endpoints that match the original API structure
-    path('', CountryListAPIView.as_view(), name='country-list-all'),
+    # Standard RESTful endpoints
+    path('', CountryListAPIView.as_view(), name='country-list'),
+    path('<int:pk>/', CountryDetailAPIView.as_view(), name='country-detail'),
 ]
