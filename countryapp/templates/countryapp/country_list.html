@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+
+{% block title %}Countries of the World{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="title is-2">Countries of the World</h1>
+    
+    <!-- Search Bar -->
+    <div class="box">
+        <div class="field">
+            <label class="label">Search Country</label>
+            <div class="control">
+                <input class="input" type="text" id="countrySearch" placeholder="Type country name...">
+            </div>
+        </div>
+        <div class="field">
+            <div class="control">
+                <button class="button is-primary" id="searchButton">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Countries Table -->
+    <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Flag</th>
+                    <th>Name</th>
+                    <th>CCA2</th>
+                    <th>Capital</th>
+                    <th>Population</th>
+                    <th>Timezone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="countriesTableBody">
+                <!-- Table rows will be added dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+        <a class="pagination-previous" id="prevPage" disabled>Previous</a>
+        <a class="pagination-next" id="nextPage">Next</a>
+        <ul class="pagination-list" id="paginationList">
+            <!-- Pagination items will be added dynamically -->
+        </ul>
+    </nav>
+</div>
+
+<!-- Country Details Modal -->
+<div class="modal" id="countryModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="modalCountryName">Country Details</p>
+            <button class="delete" aria-label="close" id="closeModal"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <div class="columns">
+                    <div class="column">
+                        <figure class="image is-4by3" id="modalFlagContainer">
+                            <img src="" id="modalFlag" alt="Country flag">
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <h3>Basic Information</h3>
+                        <p><strong>Official Name:</strong> <span id="modalOfficialName"></span></p>
+                        <p><strong>Region:</strong> <span id="modalRegion"></span></p>
+                        <p><strong>Subregion:</strong> <span id="modalSubregion"></span></p>
+                        <p><strong>Population:</strong> <span id="modalPopulation"></span></p>
+                        <p><strong>Area:</strong> <span id="modalArea"></span> km²</p>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <ul>
+                        <li class="is-active"><a data-tab="regional">Regional Countries</a></li>
+                        <li><a data-tab="languages">Spoken Languages</a></li>
+                        <li><a data-tab="info">Additional Info</a></li>
+                    </ul>
+                </div>
+                
+                <div class="tab-content" id="regionalTab">
+                    <h3>Countries in the Same Region</h3>
+                    <div class="tags" id="regionalCountries">
+                        <!-- Regional countries will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="languagesTab" style="display: none;">
+                    <h3>Languages</h3>
+                    <div class="tags" id="spokenLanguages">
+                        <!-- Languages will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="infoTab" style="display: none;">
+                    <h3>Additional Information</h3>
+                    <p><strong>Currency:</strong> <span id="modalCurrencies"></span></p>
+                    <p><strong>Timezones:</strong> <span id="modalTimezones"></span></p>
+                    <p><strong>Borders:</strong> <span id="modalBorders"></span></p>
+                    <div class="buttons">
+                        <a class="button is-link" id="modalGoogleMaps" target="_blank">
+                            <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                            <span>Google Maps</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button" id="closeModalButton">Close</button>
+        </footer>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Global variables
+    let allCountries = [];
+    let currentPage = 1;
+    let countriesPerPage = 10;
+    let totalPages = 0;
+    
+    // Fetch all countries when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchAllCountries();
+        
+        // Set up event listeners
+        document.getElementById('searchButton').addEventListener('click', searchCountries);
+        document.getElementById('countrySearch').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchCountries();
+            }
+        });
+        
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('closeModalButton').addEventListener('click', closeModal);
+        
+        // Tab switching
+        document.querySelectorAll('.tabs a').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.getAttribute('data-tab');
+                
+                // Deactivate all tabs
+                document.querySelectorAll('.tabs li').forEach(item => {
+                    item.classList.remove('is-active');
+                });
+                document.querySelectorAll('.tab-content').forEach(item => {
+                    item.style.display = 'none';
+                });
+                
+                // Activate the selected tab
+                this.parentElement.classList.add('is-active');
+                document.getElementById(tabId + 'Tab').style.display = 'block';
+            });
+        });
+        
+        // Pagination event listeners
+        document.getElementById('prevPage').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayCountries(allCountries);
+            }
+        });
+        
+        document.getElementById('nextPage').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayCountries(allCountries);
+            }
+        });
+    });
+    
+    // Fetch all countries from the API
+    function fetchAllCountries() {
+        fetch('/api/countries/')
+            .then(response => response.json())
+            .then(data => {
+                allCountries = data;
+                displayCountries(allCountries);
+            })
+            .catch(error => {
+                console.error('Error fetching countries:', error);
+                alert('Error loading countries. Please try again later.');
+            });
+    }
+    
+    // Display countries with pagination
+    function displayCountries(countries) {
+        const tableBody = document.getElementById('countriesTableBody');
+        tableBody.innerHTML = '';
+        
+        totalPages = Math.ceil(countries.length / countriesPerPage);
+        
+        // Update pagination controls
+        updatePagination();
+        
+        // Calculate start and end indices for current page
+        const startIndex = (currentPage - 1) * countriesPerPage;
+        const endIndex = Math.min(startIndex + countriesPerPage, countries.length);
+        
+        // Display countries for current page
+        for (let i = startIndex; i < endIndex; i++) {
+            const country = countries[i];
+            const row = document.createElement('tr');
+            
+            // Format population with commas
+            const formattedPopulation = country.population ? country.population.toLocaleString() : 'N/A';
+            
+            // Get first capital if available
+            const capital = country.capital && country.capital.length > 0 ? country.capital[0] : 'N/A';
+            
+            // Get first timezone if available
+            const timezone = country.timezones && country.timezones.length > 0 ? country.timezones[0] : 'N/A';
+            
+            row.innerHTML = `
+                <td>
+                    <figure class="image is-48x48">
+                        <img src="${country.flags.png || '/static/images/placeholder-flag.png'}" alt="${country.name.common} flag">
+                    </figure>
+                </td>
+                <td>${country.name.common}</td>
+                <td>${country.cca2}</td>
+                <td>${capital}</td>
+                <td>${formattedPopulation}</td>
+                <td>${timezone}</td>
+                <td>
+                    <button class="button is-info is-small details-button" data-id="${country.id}">
+                        Details
+                    </button>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        }
+        
+        // Add event listeners to detail buttons
+        document.querySelectorAll('.details-button').forEach(button => {
+            button.addEventListener('click', function() {
+                let countryId = this.getAttribute('data-id');
+
+            fetch(`/api/countries/${countryId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    countrydetail = data;
+                    openCountryDetails(countrydetail);
+                })
+                .catch(error => {
+                    console.error('Error fetching country:', error);
+                    alert('Error loading countries. Please try again later.');
+                });
+            });
+        });
+    }
+    
+    // Update pagination controls
+    function updatePagination() {
+        const prevButton = document.getElementById('prevPage');
+        const nextButton = document.getElementById('nextPage');
+        const paginationList = document.getElementById('paginationList');
+        
+        // Update previous/next buttons
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = currentPage === totalPages;
+        
+        // Clear pagination list
+        paginationList.innerHTML = '';
+        
+        // Add pagination items
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            
+            a.className = 'pagination-link';
+            if (i === currentPage) {
+                a.className += ' is-current';
+                a.setAttribute('aria-current', 'page');
+            }
+            a.setAttribute('aria-label', `Page ${i}`);
+            a.innerText = i;
+            
+            a.addEventListener('click', function() {
+                currentPage = i;
+                displayCountries(allCountries);
+            });
+            
+            li.appendChild(a);
+            paginationList.appendChild(li);
+        }
+    }
+    
+    // Search countries by name
+    function searchCountries() {
+        const searchTerm = document.getElementById('countrySearch').value.trim();
+        
+        if (searchTerm === '') {
+            // If search is empty, show all countries
+            currentPage = 1;
+            displayCountries(allCountries);
+            return;
+        }
+        
+        fetch(`/api/countries/search/?q=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(data => {
+                currentPage = 1;
+                displayCountries(data);
+            })
+            .catch(error => {
+                console.error('Error searching countries:', error);
+                alert('Error searching countries. Please try again.');
+            });
+    }
+    
+    // Open country details modal
+    function openCountryDetails(country) {
+        // Set basic information
+        document.getElementById('modalCountryName').textContent = country.name.common;
+        document.getElementById('modalOfficialName').textContent = country.name.official;
+        document.getElementById('modalRegion').textContent = country.region || 'N/A';
+        document.getElementById('modalSubregion').textContent = country.subregion || 'N/A';
+        document.getElementById('modalPopulation').textContent = country.population ? country.population.toLocaleString() : 'N/A';
+        document.getElementById('modalArea').textContent = country.area ? country.area.toLocaleString() : 'N/A';
+        // Set flag
+        const flagImg = document.getElementById('modalFlag');
+        flagImg.src = country.flags.png || '/static/images/placeholder-flag.png';
+        flagImg.alt = country.flags.alt || `${country.name.common} flag`;
+        
+        // Set currencies
+        const currenciesSpan = document.getElementById('modalCurrencies');
+        if (country.currencies && Object.keys(country.currencies).length > 0) {
+            const currencyList = Object.entries(country.currencies).map(([code, currency]) => {
+                return `${currency.name} (${currency.symbol || code})`;
+            }).join(', ');
+            currenciesSpan.textContent = currencyList;
+        } else {
+            currenciesSpan.textContent = 'N/A';
+        }
+        
+        // Set timezones
+        document.getElementById('modalTimezones').textContent = 
+            country.timezones && country.timezones.length > 0 ? country.timezones.join(', ') : 'N/A';
+            
+        // Set borders
+        const bordersSpan = document.getElementById('modalBorders');
+        if (country.borders && country.borders.length > 0) {
+            bordersSpan.textContent = country.borders.join(', ');
+        } else {
+            bordersSpan.textContent = 'None (Island or no land borders)';
+        }
+        
+        // Set Google Maps link
+        const mapsLink = document.getElementById('modalGoogleMaps');
+        if (country.maps && country.maps.googleMaps) {
+            mapsLink.href = country.maps.googleMaps;
+            mapsLink.style.display = 'inline-flex';
+        } else {
+            mapsLink.style.display = 'none';
+        }
+        
+        // Fetch and display regional countries
+        fetchRegionalCountries(country.id);
+        
+        // Display languages
+        displayLanguages(country);
+        
+        // Show the modal
+        document.getElementById('countryModal').classList.add('is-active');
+        document.body.classList.add('is-clipped');
+    }
+    
+    // Fetch countries in the same region
+    function fetchRegionalCountries(countryId) {
+        const regionalContainer = document.getElementById('regionalCountries');
+        regionalContainer.innerHTML = '<div class="is-loading">Loading...</div>';
+        
+        fetch(`/api/countries/${countryId}/region/`)
+            .then(response => response.json())
+            .then(data => {
+                regionalContainer.innerHTML = '';
+                
+                if (data.length === 0) {
+                    regionalContainer.innerHTML = '<p>No other countries in this region</p>';
+                    return;
+                }
+                
+                data.forEach(country => {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag is-primary is-medium';
+                    tag.textContent = country.name.common;
+                    regionalContainer.appendChild(tag);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching regional countries:', error);
+                regionalContainer.innerHTML = '<p class="has-text-danger">Error loading regional countries</p>';
+            });
+    }
+    
+    // Display languages for a country
+    function displayLanguages(country) {
+        const languagesContainer = document.getElementById('spokenLanguages');
+        languagesContainer.innerHTML = '';
+        
+        if (country.languages && Object.keys(country.languages).length > 0) {
+            Object.entries(country.languages).forEach(([code, name]) => {
+                const tag = document.createElement('span');
+                tag.className = 'tag is-info is-medium';
+                tag.textContent = name;
+                languagesContainer.appendChild(tag);
+            });
+        } else {
+            languagesContainer.innerHTML = '<p>No language information available</p>';
+        }
+    }
+    
+    // Fetch countries by language
+    function fetchCountriesByLanguage(languageCode) {
+        fetch(`/api/countries/language/${languageCode}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Close the modal
+                closeModal();
+                
+                // Display the filtered countries
+                currentPage = 1;
+                displayCountries(data);
+            })
+            .catch(error => {
+                console.error('Error fetching countries by language:', error);
+                alert('Error loading countries for this language. Please try again.');
+            });
+    }
+    
+    // Close the country details modal
+    function closeModal() {
+        document.getElementById('countryModal').classList.remove('is-active');
+        document.body.classList.remove('is-clipped');
+    }
+</script>
+{% endblock %}

@@ -1,11 +1,48 @@
 from rest_framework import serializers
 from .models import (
-    Country, CapitalCity, CountryName, AlternativeSpelling, 
-    BorderCountry, Currency, CountryCurrency, Language, 
-    CountryLanguage, Demonym, CountryTranslation, InternationalDialingCode
+    Country, InternationalDialingCode
 )
-
 class CountryListSerializer(serializers.ModelSerializer):
+    """Serializer for list of countries with full details matching the RestCountries API format"""
+    name = serializers.SerializerMethodField()
+    capital = serializers.SerializerMethodField()
+    timezones = serializers.ListField()
+    flags = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Country
+        fields = [
+            'id', 'name', 'cca2', 'capital', 'population', 'timezones', 'flags'
+        ]
+    
+    def get_name(self, obj):
+        result = {
+            'common': obj.common_name,
+            'official': obj.official_name,
+            'nativeName': {}
+        }
+        
+        # Add native names
+        native_names = obj.names.all()
+        for name in native_names:
+            result['nativeName'][name.language_code] = {
+                'official': name.official_name,
+                'common': name.common_name
+            }
+        
+        return result
+    
+    def get_capital(self, obj):
+        return [capital.name for capital in obj.capitals.all()]
+    
+    def get_flags(self, obj):
+        return {
+            'png': obj.flag_png_url,
+            'svg': obj.flag_svg_url,
+            'alt': obj.flag_alt
+        }
+    
+class CountryDetailSerializer(serializers.ModelSerializer):
     """Serializer for list of countries with full details matching the RestCountries API format"""
     name = serializers.SerializerMethodField()
     tld = serializers.SerializerMethodField()
@@ -38,7 +75,7 @@ class CountryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = [
-            'name', 'tld', 'cca2', 'ccn3', 'cioc', 'independent', 'status', 
+            'id', 'name', 'tld', 'cca2', 'ccn3', 'cioc', 'independent', 'status', 
             'unMember', 'currencies', 'idd', 'capital', 'altSpellings', 
             'region', 'subregion', 'languages', 'latlng', 'landlocked', 
             'borders', 'area', 'demonyms', 'cca3', 'translations', 'flag', 
@@ -169,8 +206,7 @@ class CountryListSerializer(serializers.ModelSerializer):
         
     def get_flag(self, obj):
         # Return flag emoji for the country
-        # This is typically a unicode flag emoji
-        return "🇺🇳"  # Default UN flag as placeholder, you can implement proper flag emoji lookup
+        return "🇺🇳"
 
 
 class CountryCreateUpdateSerializer(serializers.ModelSerializer):

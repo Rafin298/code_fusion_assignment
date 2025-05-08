@@ -1,0 +1,54 @@
+.table .image.is-48x48 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table .image.is-48x48 img {
+    object-fit: cover;
+    border: 1px solid #dbdbdb;
+}
+
+/* Add hover effect to table rows */
+.table tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+/* Style the country details modal */
+#modalFlagContainer img {
+    max-height: 200px;
+    object-fit: contain;
+    border: 1px solid #dbdbdb;
+}
+
+/* Style the regional countries and languages tags */
+.tags .tag {
+    margin: 0.25rem;
+}
+
+/* Style tab content */
+.tab-content {
+    padding: 1rem 0;
+}
+
+/* Add some spacing between fields in modal */
+.modal-card-body p {
+    margin-bottom: 0.5rem;
+}
+
+/* Fix pagination on mobile */
+@media screen and (max-width: 768px) {
+    .pagination-list {
+        margin-top: 0.5rem;
+    }
+    
+    .pagination-list li {
+        margin: 0.25rem;
+    }
+    
+    .pagination-previous,
+    .pagination-next {
+        margin-bottom: 0.5rem;
+    }
+}

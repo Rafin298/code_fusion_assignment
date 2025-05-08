@@ -3,12 +3,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
 
 from .models import (
     Country, Language
 )
 from .serializers import (
-    CountryListSerializer, CountryCreateUpdateSerializer
+    CountryDetailSerializer, CountryListSerializer, CountryCreateUpdateSerializer
 )
 
 class CountryListAPIView(APIView):
@@ -41,7 +42,7 @@ class CountryDetailAPIView(APIView):
     def get(self, request, pk):
         """Get details of a specific country"""
         country = self.get_object(pk)
-        serializer = CountryListSerializer(country)
+        serializer = CountryDetailSerializer(country)
         return Response(serializer.data)
     
     def put(self, request, pk):
@@ -117,5 +118,13 @@ class CountrySearchAPIView(APIView):
             Q(translations__official_name__icontains=search_term)
         ).distinct()
         
-        serializer = CountryListSerializer(countries, many=True)
+        serializer = CountryDetailSerializer(countries, many=True)
         return Response(serializer.data)
+
+class HomeView(TemplateView):
+    """Home page view showing the list of countries"""
+    template_name = 'countryapp/country_list.html'
+
+class AboutView(TemplateView):
+    """About page view"""
+    template_name = 'countryapp/about.html'
