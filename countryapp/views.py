@@ -8,7 +8,7 @@ from .models import (
     Country
 )
 from .serializers import (
-    CountryListSerializer
+    CountryListSerializer, CountryCreateUpdateSerializer
 )
 
 class CountryListAPIView(APIView):
@@ -20,6 +20,16 @@ class CountryListAPIView(APIView):
         serializer = CountryListSerializer(countries, many=True)
         return Response(serializer.data)
     
+    def post(self, request):
+        """Create a new country"""
+        serializer = CountryCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            # Return the newly created country with full details
+            country = Country.objects.get(pk=serializer.instance.pk)
+            response_serializer = CountryListSerializer(country)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CountryDetailAPIView(APIView):
@@ -34,4 +44,4 @@ class CountryDetailAPIView(APIView):
         serializer = CountryListSerializer(country)
         return Response(serializer.data)
     
-   
+    
