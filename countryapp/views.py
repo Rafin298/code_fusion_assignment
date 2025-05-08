@@ -62,3 +62,22 @@ class CountryDetailAPIView(APIView):
         country.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class CountryByRegionAPIView(APIView):
+    """List countries in the same region as a specified country"""
+    
+    def get(self, request, pk):
+        """Get countries in the same region"""
+        country = get_object_or_404(Country, pk=pk)
+        
+        if not country.region:
+            return Response(
+                {"error": "The specified country does not have a region assigned."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        regional_countries = Country.objects.filter(region=country.region).exclude(pk=pk)
+        serializer = CountryListSerializer(regional_countries, many=True)
+        return Response(serializer.data)
+
+
