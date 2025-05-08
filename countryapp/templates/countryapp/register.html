@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-6">
+                <div class="box">
+                    <h1 class="title has-text-centered">Register</h1>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="notification is-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if form.errors %}
+                    <div class="notification is-danger">
+                        Please correct the errors below.
+                    </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="field">
+                        <label class="label">Username</label>
+                        <div class="control has-icons-left">
+                            <input class="input {% if form.username.errors %}is-danger{% endif %}" type="text" name="username" placeholder="Username" required value="{{ form.username.value|default:'' }}">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                        {% if form.username.errors %}
+                            <p class="help is-danger">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control has-icons-left">
+                            <input class="input {% if form.email.errors %}is-danger{% endif %}" type="email" name="email" placeholder="Email" required value="{{ form.email.value|default:'' }}">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                        </div>
+                        {% if form.email.errors %}
+                            <p class="help is-danger">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Password</label>
+                        <div class="control has-icons-left">
+                            <input class="input {% if form.password1.errors %}is-danger{% endif %}" type="password" name="password1" placeholder="Password" required>
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                        </div>
+                        {% if form.password1.errors %}
+                            <p class="help is-danger">{{ form.password1.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Confirm Password</label>
+                        <div class="control has-icons-left">
+                            <input class="input {% if form.password2.errors %}is-danger{% endif %}" type="password" name="password2" placeholder="Confirm Password" required>
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                        </div>
+                        {% if form.password2.errors %}
+                            <p class="help is-danger">{{ form.password2.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-primary is-fullwidth" type="submit">Register</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="has-text-centered mt-4">
+                    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+{% endblock %}

@@ -148,3 +148,12 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ]
 }
+
+# Authentication settings
+LOGIN_REDIRECT_URL = 'home'  # Where to redirect after login
+LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
+
+# Session settings
+SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
+SESSION_COOKIE_SECURE = True  # Use secure cookies if using HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes

@@ -62,6 +62,40 @@
                     About
                 </a>
             </div>
+            
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        {% if user.is_authenticated %}
+                            <span class="navbar-item">
+                                Welcome, {{ user.username }}
+                            </span>
+                            <form method="post" action="{% url 'logout' %}" style="margin-bottom: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="button is-light">
+                                    <span class="icon">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </span>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            <a class="button is-light" href="{% url 'login' %}">
+                                <span class="icon">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </span>
+                                <span>Login</span>
+                            </a>
+                            <a class="button is-primary" href="{% url 'register' %}">
+                                <span class="icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </span>
+                                <span>Register</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
     
@@ -74,7 +108,7 @@
     <footer class="footer">
         <div class="content has-text-centered">
             <p>
-                <strong>Country Info App</strong> - Developed as a project assignment &copy; {% now "Y" %}
+                <strong>Country Info App</strong> - Developed by Rafin Khan &copy; {% now "Y" %}
             </p>
         </div>
     </footer>

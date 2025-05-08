@@ -4,6 +4,12 @@ from rest_framework import status
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
+from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.permissions import IsAuthenticated
 
 from .models import (
     Country, Language
@@ -14,6 +20,7 @@ from .serializers import (
 
 class CountryListAPIView(APIView):
     """List all countries or create a new one"""
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         """Get all countries with full details"""
@@ -35,6 +42,7 @@ class CountryListAPIView(APIView):
 
 class CountryDetailAPIView(APIView):
     """Retrieve, update or delete a country"""
+    permission_classes = [IsAuthenticated]
     
     def get_object(self, pk):
         return get_object_or_404(Country, pk=pk)
@@ -66,6 +74,7 @@ class CountryDetailAPIView(APIView):
 
 class CountryByRegionAPIView(APIView):
     """List countries in the same region as a specified country"""
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, pk):
         """Get countries in the same region"""
@@ -84,6 +93,7 @@ class CountryByRegionAPIView(APIView):
 
 class CountryByLanguageAPIView(APIView):
     """List countries that speak a specific language"""
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, language_code):
         """Get countries speaking the specified language"""
@@ -98,6 +108,7 @@ class CountryByLanguageAPIView(APIView):
 
 class CountrySearchAPIView(APIView):
     """Search countries by name (supports partial search)"""
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, name=None):
         """Search countries by name"""
@@ -121,10 +132,23 @@ class CountrySearchAPIView(APIView):
         serializer = CountryDetailSerializer(countries, many=True)
         return Response(serializer.data)
 
-class HomeView(TemplateView):
+class RegisterView(CreateView):
+    """View for user registration"""
+    template_name = 'countryapp/register.html'
+    form_class = UserCreationForm
+    success_url = reverse_lazy('login')
+    
+    def form_valid(self, form):
+        messages.success(self.request, "Registration successful. You can now login.")
+        return super().form_valid(form)
+
+
+class HomeView(LoginRequiredMixin, TemplateView):
     """Home page view showing the list of countries"""
     template_name = 'countryapp/country_list.html'
+    login_url = 'login'  # Redirect to login page if user is not authenticated
 
-class AboutView(TemplateView):
+class AboutView(LoginRequiredMixin, TemplateView):
     """About page view"""
     template_name = 'countryapp/about.html'
+    login_url = 'login'
