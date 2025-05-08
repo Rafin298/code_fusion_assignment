@@ -115,7 +115,7 @@ class Currency(models.Model):
     """Model for currencies used by countries"""
     code = models.CharField(max_length=3, primary_key=True)
     name = models.CharField(max_length=100)
-    symbol = models.CharField(max_length=5)
+    symbol = models.CharField(max_length=10)
     
     class Meta:
         verbose_name_plural = "Currencies"
@@ -188,8 +188,8 @@ class CountryTranslation(models.Model):
 class InternationalDialingCode(models.Model):
     """Model for international dialing codes"""
     country = models.OneToOneField(Country, on_delete=models.CASCADE, related_name='idd')
-    root = models.CharField(max_length=5)
-    suffixes = ArrayField(models.CharField(max_length=5), blank=True, null=True)
+    root = models.CharField(max_length=10)
+    suffixes = ArrayField(models.CharField(max_length=10), blank=True, null=True)
     
     def __str__(self):
         return f"{self.root} ({self.country.common_name})"
