@@ -95,3 +95,27 @@ class CountryByLanguageAPIView(APIView):
         return Response(serializer.data)
 
 
+class CountrySearchAPIView(APIView):
+    """Search countries by name (supports partial search)"""
+    
+    def get(self, request, name=None):
+        """Search countries by name"""
+        search_term = name or request.query_params.get('q', '')
+        
+        if not search_term:
+            return Response(
+                {"error": "Please provide a search term with 'q' parameter"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Search in common name, official name, alternative spellings and translations
+        countries = Country.objects.filter(
+            Q(common_name__icontains=search_term) |
+            Q(official_name__icontains=search_term) |
+            Q(alt_spellings__spelling__icontains=search_term) |
+            Q(translations__common_name__icontains=search_term) |
+            Q(translations__official_name__icontains=search_term)
+        ).distinct()
+        
+        serializer = CountryListSerializer(countries, many=True)
+        return Response(serializer.data)
