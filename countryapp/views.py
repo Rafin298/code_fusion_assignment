@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from .models import (
-    Country
+    Country, Language
 )
 from .serializers import (
     CountryListSerializer, CountryCreateUpdateSerializer
@@ -78,6 +78,20 @@ class CountryByRegionAPIView(APIView):
         
         regional_countries = Country.objects.filter(region=country.region).exclude(pk=pk)
         serializer = CountryListSerializer(regional_countries, many=True)
+        return Response(serializer.data)
+
+
+class CountryByLanguageAPIView(APIView):
+    """List countries that speak a specific language"""
+    
+    def get(self, request, language_code):
+        """Get countries speaking the specified language"""
+        # Check if language exists
+        language = get_object_or_404(Language, code=language_code)
+        
+        # Get countries that speak this language
+        countries = Country.objects.filter(languages__language=language)
+        serializer = CountryListSerializer(countries, many=True)
         return Response(serializer.data)
 
 
