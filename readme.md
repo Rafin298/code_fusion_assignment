@@ -108,6 +108,13 @@ You can register for a new account or use these guest credentials to login:
 - Username: guest
 - Password: Abcd123#
 
+## 📚 API Documentation
+
+The application includes Swagger documentation for the APIs:
+
+- Local Swagger URL: [http://localhost:8000/api/schema/swagger-ui/](http://localhost:8000/api/schema/swagger-ui/)
+- Live Site Swagger URL: [https://country-info-app-seven.vercel.app/api/schema/swagger-ui/](https://country-info-app-seven.vercel.app/api/schema/swagger-ui/)
+
 ## 📝 Features
 
 - Country information database
@@ -116,6 +123,7 @@ You can register for a new account or use these guest credentials to login:
 - Frontend development with HTML, CSS, and JavaScript
 - Data presentation and user interface design
 - User authentication
+
 ## 👨‍💻 Author
 
 [Rafin298](https://github.com/Rafin298)

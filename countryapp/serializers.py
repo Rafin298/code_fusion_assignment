@@ -214,7 +214,7 @@ class CountryCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = [
-            'common_name', 'official_name', 'cca2', 'cca3', 'ccn3', 'cioc',
+            'id', 'common_name', 'official_name', 'cca2', 'cca3', 'ccn3', 'cioc',
             'independent', 'status', 'un_member', 'region', 'subregion',
             'latitude', 'longitude', 'landlocked', 'area', 'population',
             'tlds', 'start_of_week', 'gini', 'fifa', 'car_signs', 'car_side',
