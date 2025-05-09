@@ -10,6 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 
 from .models import (
     Country, Language
@@ -18,15 +19,28 @@ from .serializers import (
     CountryDetailSerializer, CountryListSerializer, CountryCreateUpdateSerializer
 )
 
+class StandardResultsSetPagination(PageNumberPagination):
+    """Standard pagination for API results"""
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class CountryListAPIView(APIView):
     """List all countries or create a new one"""
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
     
     def get(self, request):
-        """Get all countries with full details"""
-        countries = Country.objects.all()
-        serializer = CountryListSerializer(countries, many=True)
-        return Response(serializer.data)
+        """Get all countries with pagination"""
+        countries = Country.objects.all().order_by('common_name')
+        
+        # Implement pagination
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(countries, request)
+        serializer = CountryListSerializer(result_page, many=True)
+        
+        # Create response with pagination metadata
+        return paginator.get_paginated_response(serializer.data)
     
     def post(self, request):
         """Create a new country"""
@@ -109,6 +123,7 @@ class CountryByLanguageAPIView(APIView):
 class CountrySearchAPIView(APIView):
     """Search countries by name (supports partial search)"""
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
     
     def get(self, request, name=None):
         """Search countries by name"""
@@ -127,10 +142,15 @@ class CountrySearchAPIView(APIView):
             Q(alt_spellings__spelling__icontains=search_term) |
             Q(translations__common_name__icontains=search_term) |
             Q(translations__official_name__icontains=search_term)
-        ).distinct()
+        ).distinct().order_by('common_name')
         
-        serializer = CountryDetailSerializer(countries, many=True)
-        return Response(serializer.data)
+        # Implement pagination
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(countries, request)
+        serializer = CountryListSerializer(result_page, many=True)
+        
+        # Create response with pagination metadata
+        return paginator.get_paginated_response(serializer.data)
 
 class RegisterView(CreateView):
     """View for user registration"""
