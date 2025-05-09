@@ -27,7 +27,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class CountryListAPIView(APIView):
     """List all countries or create a new one"""
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
@@ -49,7 +49,7 @@ class CountryListAPIView(APIView):
             serializer.save()
             # Return the newly created country with full details
             country = Country.objects.get(pk=serializer.instance.pk)
-            response_serializer = CountryListSerializer(country)
+            response_serializer = CountryCreateUpdateSerializer(country)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,7 +75,7 @@ class CountryDetailAPIView(APIView):
             serializer.save()
             # Return the updated country with full details
             updated_country = self.get_object(pk)
-            response_serializer = CountryListSerializer(updated_country)
+            response_serializer = CountryCreateUpdateSerializer(updated_country)
             return Response(response_serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
