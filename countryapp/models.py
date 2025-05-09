@@ -47,8 +47,8 @@ class Country(models.Model):
     coat_of_arms_svg_url = models.URLField(max_length=255, null=True, blank=True)
     
     # Postal code information
-    postal_code_format = models.CharField(max_length=50, null=True, blank=True)
-    postal_code_regex = models.CharField(max_length=100, null=True, blank=True)
+    postal_code_format = models.CharField(max_length=255, null=True, blank=True)
+    postal_code_regex = models.CharField(max_length=255, null=True, blank=True)
     
     # Meta and timestamps
     created_at = models.DateTimeField(auto_now_add=True)

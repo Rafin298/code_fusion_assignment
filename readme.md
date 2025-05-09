@@ -82,13 +82,40 @@ python manage.py runserver
 
 The application will be available at [http://localhost:8000/](http://localhost:8000/).
 
+## 📥 Data Import
+
+The application includes a management command to fetch country data from the [REST Countries API](https://restcountries.com/):
+
+### Import all country data
+
+```bash
+python manage.py fetch_countries
+```
+
+### Reset and import all country data
+
+This will delete all existing country data before importing:
+
+```bash
+python manage.py fetch_countries --reset
+```
+
+## 🌐 Live Demo
+
+The application is available online at: [https://country-info-app-seven.vercel.app/](https://country-info-app-seven.vercel.app/)
+
+You can register for a new account or use these guest credentials to login:
+- Username: guest
+- Password: Abcd123#
+
 ## 📝 Features
 
 - Country information database
-- PostgreSQL backend for efficient data management
-- Django admin interface for easy content management
-
-
+- Backend development with Django
+- Creating RESTful APIs
+- Frontend development with HTML, CSS, and JavaScript
+- Data presentation and user interface design
+- User authentication
 ## 👨‍💻 Author
 
 [Rafin298](https://github.com/Rafin298)
