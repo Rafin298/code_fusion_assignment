@@ -4,7 +4,7 @@ from .models import (
 )
 class CountryListSerializer(serializers.ModelSerializer):
     """Serializer for list of countries with full details matching the RestCountries API format"""
-    name = serializers.SerializerMethodField()
+    # name = serializers.SerializerMethodField()
     capital = serializers.SerializerMethodField()
     timezones = serializers.ListField()
     flags = serializers.SerializerMethodField()
@@ -12,25 +12,25 @@ class CountryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = [
-            'id', 'name', 'cca2', 'capital', 'population', 'timezones', 'flags'
+            'id', 'common_name', 'cca2', 'capital', 'population', 'timezones', 'flags'
         ]
     
-    def get_name(self, obj):
-        result = {
-            'common': obj.common_name,
-            'official': obj.official_name,
-            'nativeName': {}
-        }
+    # def get_name(self, obj):
+    #     result = {
+    #         'common': obj.common_name,
+    #         'official': obj.official_name,
+    #         'nativeName': {}
+    #     }
         
-        # Add native names
-        native_names = obj.names.all()
-        for name in native_names:
-            result['nativeName'][name.language_code] = {
-                'official': name.official_name,
-                'common': name.common_name
-            }
+    #     # Add native names
+    #     native_names = obj.names.all()
+    #     for name in native_names:
+    #         result['nativeName'][name.language_code] = {
+    #             'official': name.official_name,
+    #             'common': name.common_name
+    #         }
         
-        return result
+    #     return result
     
     def get_capital(self, obj):
         return [capital.name for capital in obj.capitals.all()]
@@ -221,4 +221,13 @@ class CountryCreateUpdateSerializer(serializers.ModelSerializer):
             'timezones', 'continents', 'google_maps_url', 'openstreetmap_url',
             'flag_png_url', 'flag_svg_url', 'flag_alt', 'coat_of_arms_png_url',
             'coat_of_arms_svg_url', 'postal_code_format', 'postal_code_regex'
+        ]
+        
+class CountryListRegionSerializer(serializers.ModelSerializer):
+    """Serializer for list of countries with full details matching the RestCountries API format"""
+    
+    class Meta:
+        model = Country
+        fields = [
+            'id', 'common_name'
         ]

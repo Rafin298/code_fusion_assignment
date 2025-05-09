@@ -16,7 +16,7 @@ from .models import (
     Country, Language
 )
 from .serializers import (
-    CountryDetailSerializer, CountryListSerializer, CountryCreateUpdateSerializer
+    CountryDetailSerializer, CountryListRegionSerializer, CountryListSerializer, CountryCreateUpdateSerializer
 )
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -27,7 +27,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class CountryListAPIView(APIView):
     """List all countries or create a new one"""
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
@@ -101,7 +101,7 @@ class CountryByRegionAPIView(APIView):
             )
         
         regional_countries = Country.objects.filter(region=country.region).exclude(pk=pk)
-        serializer = CountryListSerializer(regional_countries, many=True)
+        serializer = CountryListRegionSerializer(regional_countries, many=True)
         return Response(serializer.data)
 
 

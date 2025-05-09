@@ -242,10 +242,10 @@
             row.innerHTML = `
                 <td>
                     <figure class="image is-48x48">
-                        <img src="${country.flags.png || '/static/images/placeholder-flag.png'}" alt="${country.name.common} flag">
+                        <img src="${country.flags.png || '/static/images/placeholder-flag.png'}" alt="${country.common_name} flag">
                     </figure>
                 </td>
-                <td>${country.name.common}</td>
+                <td>${country.common_name}</td>
                 <td>${country.cca2}</td>
                 <td>${capital}</td>
                 <td>${formattedPopulation}</td>
@@ -264,7 +264,12 @@
         document.querySelectorAll('.details-button').forEach(button => {
             button.addEventListener('click', function() {
                 let countryId = this.getAttribute('data-id');
-
+                
+                // Show loading state on the button
+                const originalButtonText = this.innerHTML;
+                this.innerHTML = '<span class="icon is-small"><i class="fas fa-spinner fa-pulse"></i></span><span>Loading...</span>';
+                this.disabled = true;
+        
                 fetch(`/api/countries/${countryId}/`)
                     .then(response => response.json())
                     .then(data => {
@@ -274,6 +279,11 @@
                     .catch(error => {
                         console.error('Error fetching country:', error);
                         alert('Error loading country details. Please try again later.');
+                    })
+                    .finally(() => {
+                        // Restore button state
+                        this.innerHTML = originalButtonText;
+                        this.disabled = false;
                     });
             });
         });
@@ -495,7 +505,7 @@
                 data.forEach(country => {
                     const tag = document.createElement('span');
                     tag.className = 'tag is-primary is-medium';
-                    tag.textContent = country.name.common;
+                    tag.textContent = country.common_name;
                     regionalContainer.appendChild(tag);
                 });
             })
