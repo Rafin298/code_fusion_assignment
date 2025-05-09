@@ -27,7 +27,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class CountryListAPIView(APIView):
     """List all countries or create a new one"""
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
